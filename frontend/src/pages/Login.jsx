@@ -22,36 +22,65 @@ function Login() {
       localStorage.setItem('token', res.data.token)
       localStorage.setItem('user', JSON.stringify(res.data.user))
 
-      navigate('/dashboard')
+      // clear old role
+      localStorage.removeItem('activeRole')
+
+      // multiple roles
+      if (res.data.user.roles.length > 1) {
+        navigate('/choose-role')
+      } else {
+        // single role
+        localStorage.setItem(
+          'activeRole',
+          res.data.user.roles[0].name
+        )
+
+        navigate('/dashboard')
+      }
+
     } catch (err) {
       setError('Invalid email or password.')
     }
   }
 
   return (
-    <div className="max-w-md mx-auto bg-white p-6 rounded border">
-      <h2 className="text-2xl font-semibold mb-5">Login</h2>
+    <div className="max-w-md mx-auto bg-white p-6 rounded-2xl border shadow-sm">
+      <h2 className="text-3xl font-bold text-blue-900 mb-2">
+        Login
+      </h2>
 
-      {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
+      <p className="text-gray-600 mb-6">
+        Welcome back to SmartCare Clinic.
+      </p>
 
-      <form onSubmit={handleSubmit}>
+      {error && (
+        <p className="text-red-600 text-sm mb-4">
+          {error}
+        </p>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
         <input
-          className="border p-2 w-full mb-3"
+          className="border p-3 rounded-lg w-full"
           placeholder="Email"
           type="email"
           value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
+          onChange={(e) =>
+            setForm({ ...form, email: e.target.value })
+          }
         />
 
         <input
-          className="border p-2 w-full mb-4"
+          className="border p-3 rounded-lg w-full"
           placeholder="Password"
           type="password"
           value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
+          onChange={(e) =>
+            setForm({ ...form, password: e.target.value })
+          }
         />
 
-        <button className="bg-blue-900 text-white px-4 py-2 rounded w-full">
+        <button className="bg-blue-900 hover:bg-blue-800 text-white px-4 py-3 rounded-lg w-full transition">
           Login
         </button>
       </form>

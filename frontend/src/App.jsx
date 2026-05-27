@@ -4,10 +4,18 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Departments from './pages/Departments'
+import AdminUsers from './pages/AdminUsers'
+import Doctors from './pages/Doctors'
+import ChooseRole from './pages/ChooseRole'
 
 function App() {
   const navigate = useNavigate()
   const token = localStorage.getItem('token')
+
+  const user = JSON.parse(localStorage.getItem('user'))
+
+const isAdmin =
+  user?.roles?.some((role) => role.name === 'admin')
 
   const handleLogout = () => {
     localStorage.removeItem('token')
@@ -29,7 +37,12 @@ function App() {
           {token ? (
             <>
               <Link className="text-gray-700 hover:text-blue-900" to="/dashboard">Dashboard</Link>
-
+              {isAdmin && (
+              <Link className="text-gray-700 hover:text-blue-900" to="/doctors">Doctors</Link>
+              )}
+              {isAdmin && (
+                <Link className="text-gray-700 hover:text-blue-900" to="/admin/users">Users</Link>
+              )}  
               <button
                 onClick={handleLogout}
                 className="bg-blue-900 text-white px-4 py-2 rounded-lg"
@@ -53,6 +66,9 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/departments" element={<Departments />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/doctors" element={<Doctors />} />
+          <Route path="/choose-role" element={<ChooseRole />} />
         </Routes>
       </main>
     </div>
