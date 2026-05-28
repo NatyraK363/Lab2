@@ -9,7 +9,9 @@ class DepartmentController extends Controller
 {
     public function index()
     {
-        return response()->json(Department::latest()->get());
+        return response()->json(
+            Department::latest()->get()
+        );
     }
 
     public function store(Request $request)
@@ -24,9 +26,24 @@ class DepartmentController extends Controller
         return response()->json($department, 201);
     }
 
+    public function update(Request $request, $id)
+    {
+        $department = Department::findOrFail($id);
+
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        $department->update($data);
+
+        return response()->json($department);
+    }
+
     public function destroy($id)
     {
-        Department::findOrFail($id)->delete();
+        $department = Department::findOrFail($id);
+        $department->delete();
 
         return response()->json([
             'message' => 'Department deleted successfully'

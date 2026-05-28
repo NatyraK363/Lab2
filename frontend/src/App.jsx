@@ -17,11 +17,11 @@ function App() {
 const isAdmin =
   user?.roles?.some((role) => role.name === 'admin')
 
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    navigate('/login')
-  }
+ const handleLogout = () => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+  navigate('/login')
+}
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -43,6 +43,7 @@ const isAdmin =
               {isAdmin && (
                 <Link className="text-gray-700 hover:text-blue-900" to="/admin/users">Users</Link>
               )}  
+              
               <button
                 onClick={handleLogout}
                 className="bg-blue-900 text-white px-4 py-2 rounded-lg"

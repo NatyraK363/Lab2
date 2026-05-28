@@ -10,7 +10,9 @@ class DoctorController extends Controller
     public function index()
     {
         return response()->json(
-            Doctor::with(['user', 'department', 'specialty'])->latest()->get()
+            Doctor::with(['user', 'department', 'specialty'])
+                ->latest()
+                ->get()
         );
     }
 
@@ -18,9 +20,12 @@ class DoctorController extends Controller
     {
         $data = $request->validate([
             'user_id' => 'nullable|exists:users,id',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'qualification' => 'nullable|string|max:255',
             'department_id' => 'required|exists:departments,id',
             'specialty_id' => 'required|exists:specialties,id',
-            'phone' => 'required|string|max:50',
+            'phone' => [ 'required', 'regex:/^\+?[0-9]{8,15}$/'],            
             'license_number' => 'required|string|unique:doctors,license_number',
             'experience_years' => 'required|integer|min:0',
             'bio' => 'nullable|string',
@@ -32,6 +37,31 @@ class DoctorController extends Controller
             'message' => 'Doctor created successfully',
             'doctor' => $doctor->load(['user', 'department', 'specialty'])
         ], 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $doctor = Doctor::findOrFail($id);
+
+        $data = $request->validate([
+            'user_id' => 'nullable|exists:users,id',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'qualification' => 'nullable|string|max:255',
+            'department_id' => 'required|exists:departments,id',
+            'specialty_id' => 'required|exists:specialties,id',
+            'phone' => [ 'required','regex:/^\+?[0-9]{8,15}$/'],            
+            'license_number' => 'required|string|unique:doctors,license_number,' . $doctor->id,
+            'experience_years' => 'required|integer|min:0',
+            'bio' => 'nullable|string',
+        ]);
+
+        $doctor->update($data);
+
+        return response()->json([
+            'message' => 'Doctor updated successfully',
+            'doctor' => $doctor->load(['user', 'department', 'specialty'])
+        ]);
     }
 
     public function destroy($id)
