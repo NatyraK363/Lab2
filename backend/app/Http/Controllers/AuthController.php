@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -31,11 +32,20 @@ class AuthController extends Controller
             ]);
         }
 
+        Patient::create([
+            'user_id' => $user->id,
+            'date_of_birth' => '2000-01-01',
+            'gender' => 'unknown',
+            'phone' => '00000000',
+            'address' => null,
+            'blood_type' => null,
+        ]);
+
         $token = auth('api')->login($user);
 
         return response()->json([
             'message' => 'User registered successfully',
-            'user' => $user,
+            'user' => $user->load('roles'),
             'token' => $token,
             'token_type' => 'bearer',
         ], 201);

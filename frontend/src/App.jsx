@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard'
 import Departments from './pages/Departments'
 import AdminUsers from './pages/AdminUsers'
 import Doctors from './pages/Doctors'
+import Appointments from './pages/Appointments'
 import ChooseRole from './pages/ChooseRole'
 
 function App() {
@@ -20,6 +21,7 @@ const isAdmin =
  const handleLogout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('user')
+  localStorage.removeItem('activeRole')
   navigate('/login')
 }
 
@@ -54,7 +56,7 @@ const isAdmin =
           ) : (
             <>
               <Link className="text-gray-700 hover:text-blue-900" to="/login">Login</Link>
-              <Link className="text-gray-700 hover:text-blue-900" to="/register">Register</Link>
+          <Link className="text-gray-700 hover:text-blue-900" to="/register">Register</Link>
             </>
           )}
         </div>
@@ -68,6 +70,7 @@ const isAdmin =
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/departments" element={<Departments />} />
           <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/appointments" element={<Appointments />} />
           <Route path="/doctors" element={<Doctors />} />
           <Route path="/choose-role" element={<ChooseRole />} />
         </Routes>

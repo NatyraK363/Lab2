@@ -13,7 +13,9 @@ class Appointment extends Model
         'appointment_time',
         'status',
         'reason',
-        'notes'
+        'notes',
+        'created_by',
+        'updated_by',
     ];
 
     public function doctor()
@@ -24,5 +26,15 @@ class Appointment extends Model
     public function patient()
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

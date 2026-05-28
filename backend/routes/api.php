@@ -6,6 +6,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\SpecialtyController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\AppointmentController;
 use App\Models\Role;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -20,6 +21,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/departments', [DepartmentController::class, 'index']);
 Route::get('/specialties', [SpecialtyController::class, 'index']);
 Route::get('/doctors', [DoctorController::class, 'index']);
+Route::get('/appointments', [AppointmentController::class, 'index']);
 /*
 |--------------------------------------------------------------------------
 | Protected routes
@@ -42,6 +44,10 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/admin/users', [UserController::class, 'index']);
     Route::post('/admin/users', [UserController::class, 'store']);
     Route::delete('/admin/users/{id}', [UserController::class, 'destroy']);
+
+    Route::post('/appointments', [AppointmentController::class, 'store']);
+    Route::put('/appointments/{id}', [AppointmentController::class, 'update']);
+    Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
 
     Route::post('/doctors', [DoctorController::class, 'store']);
     Route::put('/doctors/{id}', [DoctorController::class, 'update']);
