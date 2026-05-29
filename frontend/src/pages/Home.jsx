@@ -5,8 +5,10 @@ function Home() {
   const user = JSON.parse(localStorage.getItem('user'))
   const activeRole = localStorage.getItem('activeRole')
 
+
   const isAdmin = activeRole === 'admin'
   const isDoctor = activeRole === 'doctor'
+  const isReceptionist = activeRole === 'receptionist'
   const isPatient = activeRole === 'patient'
 
   if (token && user && isDoctor) {
@@ -134,6 +136,65 @@ function Home() {
       </div>
     )
   }
+
+  if (token && user && isReceptionist) {
+  return (
+    <div className="space-y-8">
+      <div className="bg-gradient-to-r from-blue-900 to-blue-700 text-white rounded-3xl p-10 shadow-lg">
+        <p className="text-blue-100 text-sm">Receptionist Home</p>
+
+        <h1 className="text-4xl font-bold mt-2">
+          Welcome, {user.name}
+        </h1>
+
+        <p className="text-blue-100 mt-3">
+          Manage appointments and assist patients with scheduling.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-6">
+        <Link
+          to="/dashboard"
+          className="bg-blue-900 text-white rounded-2xl p-6 hover:bg-blue-800 transition"
+        >
+          <h3 className="text-xl font-semibold">
+            Reception Dashboard
+          </h3>
+
+          <p className="text-blue-100 mt-2">
+            View daily clinic activity.
+          </p>
+        </Link>
+
+        <Link
+          to="/appointments"
+          className="bg-white border rounded-2xl p-6 hover:shadow-md transition"
+        >
+          <h3 className="text-xl font-semibold text-blue-900">
+            Manage Appointments
+          </h3>
+
+          <p className="text-gray-600 mt-2">
+            Confirm, complete or cancel appointments.
+          </p>
+        </Link>
+
+        <Link
+          to="/patients"
+          className="bg-white border rounded-2xl p-6 hover:shadow-md transition"
+        >
+          <h3 className="text-xl font-semibold text-blue-900">
+            Patients
+          </h3>
+
+          <p className="text-gray-600 mt-2">
+            View patient information.
+          </p>
+        </Link>
+      </div>
+    </div>
+  )
+}
 
   if (token && user && isPatient) {
     return (

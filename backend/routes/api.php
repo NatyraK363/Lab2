@@ -9,11 +9,15 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\PatientController;
 use App\Models\Role;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::post('/refresh-token', [AuthController::class, 'refresh']);
+Route::post('/logout', [AuthController::class, 'logout']);
 
 /*
 |--------------------------------------------------------------------------
@@ -66,6 +70,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/doctor/dashboard/stats', [DashboardController::class, 'doctorStats']);
 
     Route::get('/patients', [PatientController::class, 'index']);
+
+    Route::get('/files', [FileController::class, 'index']);
+    Route::post('/files/upload', [FileController::class, 'upload']);
 
     Route::get('/medical-records', [MedicalRecordController::class, 'myPatients']);
     Route::get('/doctor/my-patients', [MedicalRecordController::class, 'myPatients']);

@@ -2,10 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class File extends Model
 {
-    use HasFactory;
+    protected $fillable = [
+        'entity',
+        'entity_id',
+        'filename',
+        'file_path',
+        'file_size',
+        'uploaded_by',
+    ];
 }

@@ -23,7 +23,12 @@ function Appointments() {
 
   const activeRole = localStorage.getItem('activeRole')
   const isAdmin = activeRole === 'admin'
+  const isDoctor = activeRole === 'doctor'
+  const isReceptionist = activeRole === 'receptionist'
   const isPatient = activeRole === 'patient'
+
+  const canBookAppointment = isPatient || isAdmin || isReceptionist
+  const canManageAppointment = isAdmin || isReceptionist
 
   const resetForm = () => {
     setForm({
@@ -123,10 +128,11 @@ function Appointments() {
         <h1 className="text-3xl font-bold text-blue-900">
           {isBookMode ? 'Book Appointment' : 'My Appointments'}
         </h1>
+
         <p className="text-gray-600 mt-2">
           {isBookMode
             ? 'Choose department, doctor, date and time.'
-            : 'View your booked appointments and their current status.'}
+            : 'View booked appointments and their current status.'}
         </p>
       </div>
 
@@ -142,7 +148,7 @@ function Appointments() {
         </div>
       )}
 
-      {(isPatient || isAdmin) && isBookMode && (
+      {canBookAppointment && isBookMode && (
         <div className="bg-white border rounded-2xl p-6 shadow-sm">
           <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
             <select
@@ -227,8 +233,16 @@ function Appointments() {
             appointments.map((appointment) => (
               <div key={appointment.id} className="p-5 border-b">
                 <h3 className="font-semibold text-blue-900">
-                  Dr. {appointment.doctor?.first_name} {appointment.doctor?.last_name}
+                  {isDoctor || isAdmin || isReceptionist
+                  ? `Patient: ${appointment.patient?.user?.name || 'Unknown patient'}`
+                   : `Dr. ${appointment.doctor?.first_name || ''} ${appointment.doctor?.last_name || ''}`}
                 </h3>
+
+                {(isAdmin || isReceptionist) && (
+                <p className="text-sm text-gray-600">
+                Doctor: Dr. {appointment.doctor?.first_name} {appointment.doctor?.last_name}
+               </p>
+               )}
 
                 <p className="text-sm text-gray-600">
                   Date: {appointment.appointment_date} at {appointment.appointment_time}
@@ -252,7 +266,18 @@ function Appointments() {
                   {appointment.status}
                 </span>
 
-                {isAdmin && (
+                {isDoctor && (
+                  <button
+                    onClick={() => {
+                      window.location.href = '/patients'
+                    }}
+                    className="block mt-4 bg-blue-900 text-white px-4 py-2 rounded-lg text-sm"
+                  >
+                    Add Diagnosis
+                  </button>
+                )}
+
+                {canManageAppointment && (
                   <div className="flex gap-2 mt-3 flex-wrap">
                     <button
                       onClick={() => handleStatusChange(appointment.id, 'confirmed')}

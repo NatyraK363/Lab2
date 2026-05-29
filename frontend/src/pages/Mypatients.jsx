@@ -3,6 +3,7 @@ import api from '../api/axios'
 
 function MyPatients() {
   const [patients, setPatients] = useState([])
+  const [selectedVisits, setSelectedVisits] = useState({})
   const [selectedAppointment, setSelectedAppointment] = useState(null)
 
   const [form, setForm] = useState({
@@ -14,6 +15,16 @@ function MyPatients() {
   const fetchPatients = async () => {
     const res = await api.get('/doctor/my-patients')
     setPatients(res.data)
+
+    const defaults = {}
+
+    res.data.forEach((patient) => {
+      if (patient.appointments?.length > 0) {
+        defaults[patient.id] = patient.appointments[0].id
+      }
+    })
+
+    setSelectedVisits(defaults)
   }
 
   useEffect(() => {
@@ -41,6 +52,21 @@ function MyPatients() {
     fetchPatients()
   }
 
+  const getSelectedAppointment = (patient) => {
+    return patient.appointments.find(
+      (appointment) =>
+        String(appointment.id) === String(selectedVisits[patient.id])
+    )
+  }
+
+  const getLatestRecord = (appointment) => {
+    if (!appointment?.medical_records?.length) {
+      return null
+    }
+
+    return appointment.medical_records[appointment.medical_records.length - 1]
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -49,7 +75,7 @@ function MyPatients() {
         </h1>
 
         <p className="text-gray-600 mt-2">
-          View your patients, visit history and diagnoses.
+          Select a visit date to view the diagnosis, prescription and notes.
         </p>
       </div>
 
@@ -58,6 +84,11 @@ function MyPatients() {
           <h2 className="text-xl font-semibold text-blue-900 mb-4">
             Add Diagnosis
           </h2>
+
+          <p className="text-gray-600 mb-4">
+            Visit: {selectedAppointment.appointment_date} at{' '}
+            {selectedAppointment.appointment_time}
+          </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <textarea
@@ -110,71 +141,86 @@ function MyPatients() {
             No patients found.
           </div>
         ) : (
-          patients.map((patient) => (
-            <div
-              key={patient.id}
-              className="bg-white border rounded-2xl p-6 shadow-sm"
-            >
-              <h2 className="text-xl font-semibold text-blue-900">
-                {patient.user?.name}
-              </h2>
+          patients.map((patient) => {
+            const selected = getSelectedAppointment(patient)
+            const record = getLatestRecord(selected)
 
-              <p className="text-gray-600 mt-1">
-                Phone: {patient.phone}
-              </p>
+            return (
+              <div
+                key={patient.id}
+                className="bg-white border rounded-2xl p-6 shadow-sm"
+              >
+                <h2 className="text-xl font-semibold text-blue-900">
+                  {patient.user?.name}
+                </h2>
 
-              <div className="mt-5 space-y-4">
-                {patient.appointments.map((appointment) => (
-                  <div
-                    key={appointment.id}
-                    className="border rounded-xl p-4 bg-gray-50"
+                <p className="text-gray-600 mt-1">
+                  Phone: {patient.phone}
+                </p>
+
+                <div className="mt-5">
+                  <label className="block text-sm font-medium text-gray-600 mb-2">
+                    Select visit date
+                  </label>
+
+                  <select
+                    className="w-full border p-3 rounded-lg"
+                    value={selectedVisits[patient.id] || ''}
+                    onChange={(e) =>
+                      setSelectedVisits({
+                        ...selectedVisits,
+                        [patient.id]: e.target.value,
+                      })
+                    }
                   >
+                    {patient.appointments.map((appointment) => (
+                      <option key={appointment.id} value={appointment.id}>
+                        {appointment.appointment_date} at{' '}
+                        {appointment.appointment_time}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {selected && (
+                  <div className="mt-5 border rounded-xl p-5 bg-gray-50">
                     <p className="font-medium text-blue-900">
-                      Visit Date: {appointment.appointment_date} at {appointment.appointment_time}
+                      Visit Date: {selected.appointment_date} at{' '}
+                      {selected.appointment_time}
                     </p>
 
-                    <p className="text-sm text-gray-600 capitalize">
-                      Status: {appointment.status}
+                    <p className="text-sm text-gray-600 capitalize mt-1">
+                      Status: {selected.status}
                     </p>
 
-                    {appointment.medical_records?.length > 0 ? (
-                      <div className="mt-3 space-y-3">
-                        {appointment.medical_records.map((record) => (
-                          <div
-                            key={record.id}
-                            className="bg-white border rounded-lg p-3"
-                          >
-                            <p className="text-sm">
-                              <span className="font-semibold">Diagnosis:</span> {record.diagnosis}
-                            </p>
-
-                            <p className="text-sm mt-1">
-                              <span className="font-semibold">Prescription:</span> {record.prescription || 'N/A'}
-                            </p>
-
-                            <p className="text-sm mt-1">
-                              <span className="font-semibold">Notes:</span> {record.notes || 'N/A'}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-gray-500 mt-3">
-                        No diagnosis added for this visit.
+                    <div className="mt-4 bg-white border rounded-lg p-4">
+                      <p className="text-sm">
+                        <span className="font-semibold">Diagnosis:</span>{' '}
+                        {record?.diagnosis || 'No diagnosis added for this visit.'}
                       </p>
-                    )}
+
+                      <p className="text-sm mt-2">
+                        <span className="font-semibold">Prescription:</span>{' '}
+                        {record?.prescription || 'N/A'}
+                      </p>
+
+                      <p className="text-sm mt-2">
+                        <span className="font-semibold">Notes:</span>{' '}
+                        {record?.notes || 'N/A'}
+                      </p>
+                    </div>
 
                     <button
-                      onClick={() => setSelectedAppointment(appointment)}
+                      onClick={() => setSelectedAppointment(selected)}
                       className="mt-4 bg-blue-900 text-white px-4 py-2 rounded-lg text-sm"
                     >
                       Add Diagnosis
                     </button>
                   </div>
-                ))}
+                )}
               </div>
-            </div>
-          ))
+            )
+          })
         )}
       </div>
     </div>

@@ -9,9 +9,9 @@ class PatientController extends Controller
     public function index()
     {
         $user = auth('api')->user();
-        $roles = $user->roles->pluck('name')->toArray();
+        $roles = $user->roles()->pluck('name')->toArray();
 
-        if (in_array('admin', $roles)) {
+        if (in_array('admin', $roles) || in_array('receptionist', $roles)) {
             return response()->json(
                 Patient::with(['user', 'appointments.doctor'])
                     ->latest()

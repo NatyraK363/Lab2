@@ -13,41 +13,47 @@ import MyPatients from './pages/MyPatients'
 
 function App() {
   const navigate = useNavigate()
+
   const token = localStorage.getItem('token')
+  const activeRole = localStorage.getItem('activeRole')
 
-  const user = JSON.parse(localStorage.getItem('user'))
-
-const isAdmin =
-  user?.roles?.some((role) => role.name === 'admin')
-
- const handleLogout = () => {
-  localStorage.removeItem('token')
-  localStorage.removeItem('user')
-  localStorage.removeItem('activeRole')
-  navigate('/login')
-}
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    localStorage.removeItem('activeRole')
+    navigate('/login')
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
       <nav className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-blue-900">SmartCare Clinic</h1>
-          <p className="text-xs text-gray-500">Clinic Management System</p>
+          <h1 className="text-xl font-bold text-blue-900">
+            SmartCare Clinic
+          </h1>
+
+          <p className="text-xs text-gray-500">
+            Clinic Management System
+          </p>
         </div>
 
         <div className="flex gap-6 text-sm items-center">
-          <Link className="text-gray-700 hover:text-blue-900" to="/">Home</Link>
-
           {token ? (
             <>
-              <Link className="text-gray-700 hover:text-blue-900" to="/dashboard">Dashboard</Link>
-              {isAdmin && (
-              <Link className="text-gray-700 hover:text-blue-900" to="/doctors">Doctors</Link>
-              )}
-              {isAdmin && (
-                <Link className="text-gray-700 hover:text-blue-900" to="/admin/users">Users</Link>
-              )}  
-              
+              <Link
+                className="text-gray-700 hover:text-blue-900"
+                to="/"
+              >
+                Home
+              </Link>
+
+              <Link
+                className="text-gray-700 hover:text-blue-900"
+                to="/dashboard"
+              >
+                Dashboard
+              </Link>
+
               <button
                 onClick={handleLogout}
                 className="bg-blue-900 text-white px-4 py-2 rounded-lg"
@@ -57,8 +63,26 @@ const isAdmin =
             </>
           ) : (
             <>
-              <Link className="text-gray-700 hover:text-blue-900" to="/login">Login</Link>
-          <Link className="text-gray-700 hover:text-blue-900" to="/register">Register</Link>
+              <Link
+                className="text-gray-700 hover:text-blue-900"
+                to="/"
+              >
+                Home
+              </Link>
+
+              <Link
+                className="text-gray-700 hover:text-blue-900"
+                to="/login"
+              >
+                Login
+              </Link>
+
+              <Link
+                className="text-gray-700 hover:text-blue-900"
+                to="/register"
+              >
+                Register
+              </Link>
             </>
           )}
         </div>
@@ -74,9 +98,20 @@ const isAdmin =
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/appointments" element={<Appointments />} />
           <Route path="/doctors" element={<Doctors />} />
-          <Route path="/patients" element={<MyPatients />} />
-          <Route path="/patients" element={<Patient />} />
-          <Route path="/choose-role" element={<ChooseRole />} />
+
+          <Route
+            path="/patients"
+            element={
+              activeRole === 'doctor'
+                ? <MyPatients />
+                : <Patient />
+            }
+          />
+
+          <Route
+            path="/choose-role"
+            element={<ChooseRole />}
+          />
         </Routes>
       </main>
     </div>

@@ -142,6 +142,65 @@ function Dashboard() {
     )
   }
 
+  if (activeRole === 'receptionist') {
+  return (
+    <div className="space-y-8">
+      <div className="bg-gradient-to-r from-blue-900 to-blue-700 text-white rounded-3xl p-10 shadow-lg">
+        <p className="text-blue-100 text-sm">Receptionist Dashboard</p>
+
+        <h1 className="text-4xl font-bold mt-2">
+          Welcome, {user?.name}
+        </h1>
+
+        <p className="text-blue-100 mt-3 max-w-2xl">
+          Manage patient appointments, confirm visits and support daily clinic operations.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-6">
+        <Link
+          to="/appointments"
+          className="bg-blue-900 text-white rounded-2xl p-6 hover:bg-blue-800 transition shadow-sm"
+        >
+          <h3 className="text-xl font-semibold">
+            Manage Appointments
+          </h3>
+
+          <p className="text-blue-100 mt-2">
+            Confirm, complete or cancel patient appointments.
+          </p>
+        </Link>
+
+        <Link
+          to="/patients"
+          className="bg-white border rounded-2xl p-6 hover:shadow-md transition"
+        >
+          <h3 className="text-xl font-semibold text-blue-900">
+            Patients
+          </h3>
+
+          <p className="text-gray-600 mt-2">
+            View patient information and appointment history.
+          </p>
+        </Link>
+
+        <Link
+          to="/appointments?mode=book"
+          className="bg-white border rounded-2xl p-6 hover:shadow-md transition"
+        >
+          <h3 className="text-xl font-semibold text-blue-900">
+            Book Appointment
+          </h3>
+
+          <p className="text-gray-600 mt-2">
+            Schedule an appointment for a patient.
+          </p>
+        </Link>
+      </div>
+    </div>
+  )
+}
+
   if (activeRole === 'doctor') {
     return (
       <div className="space-y-8">
