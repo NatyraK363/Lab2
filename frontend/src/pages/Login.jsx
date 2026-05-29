@@ -35,7 +35,7 @@ function Login() {
           res.data.user.roles[0].name
         )
 
-        navigate('/Home')
+        navigate('/')
       }
 
     } catch (err) {

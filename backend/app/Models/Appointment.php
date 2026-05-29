@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\MedicalRecord;
 
 class Appointment extends Model
 {
@@ -37,4 +38,9 @@ class Appointment extends Model
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
+    public function medicalRecords()
+{
+    return $this->hasMany(MedicalRecord::class);
+}
 }

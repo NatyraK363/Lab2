@@ -19,7 +19,7 @@ class DoctorController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'user_id' => 'nullable|exists:users,id',
+            'user_id' => 'required|exists:users,id|unique:doctors,user_id',            
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'qualification' => 'nullable|string|max:255',
@@ -44,7 +44,7 @@ class DoctorController extends Controller
         $doctor = Doctor::findOrFail($id);
 
         $data = $request->validate([
-            'user_id' => 'nullable|exists:users,id',
+            'user_id' => 'required|exists:users,id|unique:doctors,user_id,' . $doctor->id,
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'qualification' => 'nullable|string|max:255',

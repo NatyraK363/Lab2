@@ -5,10 +5,12 @@ function Doctors() {
   const [doctors, setDoctors] = useState([])
   const [departments, setDepartments] = useState([])
   const [specialties, setSpecialties] = useState([])
+  const [users, setUsers] = useState([])
   const [editingId, setEditingId] = useState(null)
   const [error, setError] = useState('')
 
   const [form, setForm] = useState({
+    user_id: '',
     first_name: '',
     last_name: '',
     qualification: '',
@@ -25,6 +27,7 @@ function Doctors() {
 
   const resetForm = () => {
     setForm({
+      user_id: '',
       first_name: '',
       last_name: '',
       qualification: '',
@@ -35,6 +38,7 @@ function Doctors() {
       experience_years: '',
       bio: '',
     })
+
     setEditingId(null)
     setError('')
   }
@@ -66,11 +70,24 @@ function Doctors() {
     }
   }
 
+  const fetchUsers = async () => {
+    try {
+      const res = await api.get('/admin/users')
+      setUsers(res.data)
+    } catch (err) {
+      console.log('Fetch users error:', err.response?.data)
+    }
+  }
+
   useEffect(() => {
     fetchDoctors()
     fetchDepartments()
     fetchSpecialties()
-  }, [])
+
+    if (isAdmin) {
+      fetchUsers()
+    }
+  }, [isAdmin])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -93,8 +110,11 @@ function Doctors() {
       } else if (err.response?.data?.errors) {
         const firstError = Object.values(err.response.data.errors)[0][0]
         setError(firstError)
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message)
       } else {
-      setError(JSON.stringify(err.response?.data))      }
+        setError('Doctor could not be saved.')
+      }
     }
   }
 
@@ -103,6 +123,7 @@ function Doctors() {
     setError('')
 
     setForm({
+      user_id: doctor.user_id || '',
       first_name: doctor.first_name || '',
       last_name: doctor.last_name || '',
       qualification: doctor.qualification || '',
@@ -127,6 +148,10 @@ function Doctors() {
     }
   }
 
+  const doctorUsers = users.filter((user) =>
+    user.roles?.some((role) => role.name === 'doctor')
+  )
+
   return (
     <div className="space-y-8">
       <div>
@@ -149,6 +174,21 @@ function Doctors() {
           </h2>
 
           <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
+            <select
+              className="border p-3 rounded-lg md:col-span-2"
+              value={form.user_id}
+              onChange={(e) =>
+                setForm({ ...form, user_id: e.target.value })
+              }
+            >
+              <option value="">Select doctor user account</option>
+              {doctorUsers.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name} - {user.email}
+                </option>
+              ))}
+            </select>
+
             <input
               className="border p-3 rounded-lg"
               placeholder="First name"
@@ -213,14 +253,14 @@ function Doctors() {
             </select>
 
             <input
-             type="tel"
-             className="border p-3 rounded-lg"
-             placeholder="Phone"
-             value={form.phone}
-             onChange={(e) =>
-             setForm({ ...form, phone: e.target.value })
-             }
-           />
+              type="tel"
+              className="border p-3 rounded-lg"
+              placeholder="Phone"
+              value={form.phone}
+              onChange={(e) =>
+                setForm({ ...form, phone: e.target.value })
+              }
+            />
 
             <input
               className="border p-3 rounded-lg"
@@ -278,6 +318,10 @@ function Doctors() {
             </h3>
 
             <p className="text-gray-600 mt-2">
+              User Account: {doctor.user?.email || 'Not linked'}
+            </p>
+
+            <p className="text-gray-600">
               Department: {doctor.department?.name || 'Not assigned'}
             </p>
 

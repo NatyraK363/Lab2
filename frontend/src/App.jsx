@@ -6,8 +6,10 @@ import Dashboard from './pages/Dashboard'
 import Departments from './pages/Departments'
 import AdminUsers from './pages/AdminUsers'
 import Doctors from './pages/Doctors'
+import Patient from './pages/Patient'
 import Appointments from './pages/Appointments'
 import ChooseRole from './pages/ChooseRole'
+import MyPatients from './pages/MyPatients'
 
 function App() {
   const navigate = useNavigate()
@@ -72,6 +74,8 @@ const isAdmin =
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/appointments" element={<Appointments />} />
           <Route path="/doctors" element={<Doctors />} />
+          <Route path="/patients" element={<MyPatients />} />
+          <Route path="/patients" element={<Patient />} />
           <Route path="/choose-role" element={<ChooseRole />} />
         </Routes>
       </main>
