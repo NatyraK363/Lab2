@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use App\Models\Notification;
 use Carbon\Carbon;
 
 class AppointmentController extends Controller
@@ -156,6 +157,17 @@ class AppointmentController extends Controller
             ],
             'ip_address' => $request->ip(),
         ]);
+
+        if ($appointment->patient?->user) {
+
+    Notification::create([
+        'user_id' => $appointment->patient->user->id,
+        'type' => 'appointment',
+        'title' => 'Appointment Updated',
+        'message' => 'Your appointment status has been changed to: ' . ucfirst($data['status']),
+        'is_read' => false,
+    ]);
+}
 
         if ($data['status'] === 'confirmed' && $appointment->patient?->user?->email) {
             Mail::raw(
