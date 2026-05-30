@@ -13,6 +13,9 @@ class MedicalRecord extends Model
         'diagnosis',
         'prescription',
         'notes',
+        'record_date',
+        'created_by',
+        'updated_by',
     ];
 
     public function patient()

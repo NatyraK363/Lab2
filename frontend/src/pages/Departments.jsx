@@ -3,10 +3,14 @@ import api from '../api/axios'
 
 function Departments() {
   const [departments, setDepartments] = useState([])
+  const [search, setSearch] = useState('')
+  const [sortOrder, setSortOrder] = useState('az')
+
   const [form, setForm] = useState({
     name: '',
     description: '',
   })
+
   const [editingId, setEditingId] = useState(null)
 
   const activeRole = localStorage.getItem('activeRole')
@@ -47,6 +51,26 @@ function Departments() {
     await api.delete(`/departments/${id}`)
     fetchDepartments()
   }
+
+  const filteredDepartments = departments
+    .filter((department) => {
+      const name = department.name?.toLowerCase() || ''
+      const description = department.description?.toLowerCase() || ''
+      const searchText = search.toLowerCase()
+
+      return (
+        name.includes(searchText) ||
+        description.includes(searchText)
+      )
+    })
+    .sort((a, b) => {
+      const nameA = a.name || ''
+      const nameB = b.name || ''
+
+      return sortOrder === 'az'
+        ? nameA.localeCompare(nameB)
+        : nameB.localeCompare(nameA)
+    })
 
   return (
     <div className="space-y-8">
@@ -103,36 +127,70 @@ function Departments() {
         </div>
       )}
 
+      <div className="bg-white border rounded-2xl p-5 shadow-sm">
+        <h2 className="text-lg font-semibold text-blue-900 mb-4">
+          Search & Filter Departments
+        </h2>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <input
+            className="border p-3 rounded-lg"
+            placeholder="Search department name or description"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+
+          <select
+            className="border p-3 rounded-lg"
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+          >
+            <option value="az">A-Z</option>
+            <option value="za">Z-A</option>
+          </select>
+        </div>
+
+        <p className="text-sm text-gray-500 mt-3">
+          Showing {filteredDepartments.length} of {departments.length} departments
+        </p>
+      </div>
+
       <div className="grid md:grid-cols-2 gap-6">
-        {departments.map((department) => (
-          <div key={department.id} className="bg-white border rounded-2xl p-6">
-            <h3 className="text-xl font-semibold text-blue-900">
-              {department.name}
-            </h3>
-
-            <p className="text-gray-600 mt-3">
-              {department.description || 'No description available.'}
-            </p>
-
-            {isAdmin && (
-              <div className="flex gap-4 mt-5">
-                <button
-                  onClick={() => handleEdit(department)}
-                  className="text-blue-700 text-sm"
-                >
-                  Edit
-                </button>
-
-                <button
-                  onClick={() => handleDelete(department.id)}
-                  className="text-red-500 text-sm"
-                >
-                  Delete
-                </button>
-              </div>
-            )}
+        {filteredDepartments.length === 0 ? (
+          <div className="bg-white border rounded-2xl p-6 text-gray-500">
+            No departments found.
           </div>
-        ))}
+        ) : (
+          filteredDepartments.map((department) => (
+            <div key={department.id} className="bg-white border rounded-2xl p-6">
+              <h3 className="text-xl font-semibold text-blue-900">
+                {department.name}
+              </h3>
+
+              <p className="text-gray-600 mt-3">
+                {department.description || 'No description available.'}
+              </p>
+
+              {isAdmin && (
+                <div className="flex gap-4 mt-5">
+                  <button
+                    onClick={() => handleEdit(department)}
+                    className="text-blue-700 text-sm"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(department.id)}
+                    className="text-red-500 text-sm"
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          ))
+        )}
       </div>
     </div>
   )

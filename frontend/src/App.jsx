@@ -8,6 +8,7 @@ import Departments from './pages/Departments'
 import AdminUsers from './pages/AdminUsers'
 import Doctors from './pages/Doctors'
 import Patient from './pages/Patient'
+import MedicalRecord from './pages/MedicalRecord'
 import Appointments from './pages/Appointments'
 import ChooseRole from './pages/ChooseRole'
 import MyPatients from './pages/MyPatients'
@@ -217,6 +218,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/departments" element={<Departments />} />
           <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/medical-records" element={<MedicalRecord />} />
           <Route path="/appointments" element={<Appointments />} />
           <Route path="/doctors" element={<Doctors />} />
 

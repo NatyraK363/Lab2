@@ -78,6 +78,8 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/medical-records', [MedicalRecordController::class, 'myPatients']);
     Route::get('/doctor/my-patients', [MedicalRecordController::class, 'myPatients']);
     Route::post('/medical-records', [MedicalRecordController::class, 'store']);
+    Route::put('/medical-records/{id}', [MedicalRecordController::class, 'update']);
+Route::delete('/medical-records/{id}', [MedicalRecordController::class, 'destroy']);
 
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);

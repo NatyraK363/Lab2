@@ -51,6 +51,9 @@ class MedicalRecordController extends Controller
         ]);
 
         $data['doctor_id'] = $doctor->id;
+        $data['record_date'] = now()->toDateString();
+        $data['created_by'] = auth('api')->id();
+        $data['updated_by'] = auth('api')->id();
 
         $record = MedicalRecord::create($data);
 
@@ -59,4 +62,53 @@ class MedicalRecordController extends Controller
             'record' => $record
         ], 201);
     }
+
+    public function update(Request $request, $id)
+{
+    $doctor = auth('api')->user()->doctor;
+
+    if (!$doctor) {
+        return response()->json([
+            'message' => 'Doctor profile not found.'
+        ], 404);
+    }
+
+    $record = MedicalRecord::where('doctor_id', $doctor->id)
+        ->findOrFail($id);
+
+    $data = $request->validate([
+        'diagnosis' => 'required|string',
+        'prescription' => 'nullable|string',
+        'notes' => 'nullable|string',
+    ]);
+
+    $data['updated_by'] = auth('api')->id();
+
+    $record->update($data);
+
+    return response()->json([
+        'message' => 'Medical record updated successfully',
+        'record' => $record
+    ]);
+}
+
+public function destroy($id)
+{
+    $doctor = auth('api')->user()->doctor;
+
+    if (!$doctor) {
+        return response()->json([
+            'message' => 'Doctor profile not found.'
+        ], 404);
+    }
+
+    $record = MedicalRecord::where('doctor_id', $doctor->id)
+        ->findOrFail($id);
+
+    $record->delete();
+
+    return response()->json([
+        'message' => 'Medical record deleted successfully'
+    ]);
+}
 }

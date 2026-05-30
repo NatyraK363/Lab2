@@ -8,6 +8,9 @@ function Doctors() {
   const [users, setUsers] = useState([])
   const [editingId, setEditingId] = useState(null)
   const [error, setError] = useState('')
+  const [search, setSearch] = useState('')
+const [departmentFilter, setDepartmentFilter] = useState('')
+const [sortOrder, setSortOrder] = useState('az')
 
   const [form, setForm] = useState({
     user_id: '',
@@ -151,6 +154,39 @@ function Doctors() {
   const doctorUsers = users.filter((user) =>
     user.roles?.some((role) => role.name === 'doctor')
   )
+
+  const filteredDoctors = doctors
+  .filter((doctor) => {
+    const fullName =
+      `${doctor.first_name} ${doctor.last_name}`.toLowerCase()
+
+    const specialty =
+      doctor.specialty?.name?.toLowerCase() || ''
+
+    const department =
+      doctor.department?.name?.toLowerCase() || ''
+
+    const searchText = search.toLowerCase()
+
+    const matchesSearch =
+      fullName.includes(searchText) ||
+      specialty.includes(searchText) ||
+      department.includes(searchText)
+
+    const matchesDepartment = departmentFilter
+      ? String(doctor.department_id) === departmentFilter
+      : true
+
+    return matchesSearch && matchesDepartment
+  })
+  .sort((a, b) => {
+    const nameA = `${a.first_name} ${a.last_name}`
+    const nameB = `${b.first_name} ${b.last_name}`
+
+    return sortOrder === 'az'
+      ? nameA.localeCompare(nameB)
+      : nameB.localeCompare(nameA)
+  })
 
   return (
     <div className="space-y-8">
@@ -310,8 +346,53 @@ function Doctors() {
         </div>
       )}
 
+      <div className="bg-white border rounded-2xl p-5 shadow-sm">
+  <h2 className="text-lg font-semibold text-blue-900 mb-4">
+    Search & Filter Doctors
+  </h2>
+
+  <div className="grid md:grid-cols-3 gap-4">
+    <input
+      className="border p-3 rounded-lg"
+      placeholder="Search doctor, specialty..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+    />
+
+    <select
+      className="border p-3 rounded-lg"
+      value={departmentFilter}
+      onChange={(e) => setDepartmentFilter(e.target.value)}
+    >
+      <option value="">All Departments</option>
+
+      {departments.map((department) => (
+        <option
+          key={department.id}
+          value={department.id}
+        >
+          {department.name}
+        </option>
+      ))}
+    </select>
+
+    <select
+      className="border p-3 rounded-lg"
+      value={sortOrder}
+      onChange={(e) => setSortOrder(e.target.value)}
+    >
+      <option value="az">A-Z</option>
+      <option value="za">Z-A</option>
+    </select>
+  </div>
+
+  <p className="text-sm text-gray-500 mt-3">
+    Showing {filteredDoctors.length} of {doctors.length} doctors
+  </p>
+</div>
+
       <div className="grid md:grid-cols-2 gap-6">
-        {doctors.map((doctor) => (
+        {filteredDoctors.map((doctor) => (
           <div key={doctor.id} className="bg-white border rounded-2xl p-6 shadow-sm">
             <h3 className="text-xl font-semibold text-blue-900">
               Dr. {doctor.first_name} {doctor.last_name}
