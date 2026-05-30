@@ -10,6 +10,8 @@ use App\Services\AppointmentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
+use Illuminate\Support\Facades\Cache;
+
 class AppointmentController extends Controller
 {
     protected $appointmentService;
@@ -36,8 +38,17 @@ class AppointmentController extends Controller
         $query = Appointment::with(['doctor', 'patient.user']);
 
         if (in_array('admin', $roles) || in_array('receptionist', $roles)) {
-            return response()->json($query->latest()->get());
-        }
+
+    return response()->json(
+        Cache::remember(
+            'today_appointments',
+            now()->addMinutes(5),
+            function () use ($query) {
+                return $query->latest()->get();
+            }
+        )
+    );
+}
 
         if (in_array('patient', $roles)) {
             $patient = $user->patient;
@@ -66,8 +77,7 @@ class AppointmentController extends Controller
     {
         $data = $request->validate([
             'doctor_id' => 'required|exists:doctors,id',
-            'appointment_date' => 'required|date',
-            'appointment_time' => 'required',
+            'appointment_date' => 'required|date|after_or_equal:today',            'appointment_time' => 'required',
             'reason' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
@@ -98,6 +108,8 @@ class AppointmentController extends Controller
 
         $appointment = $this->appointmentRepository->create($data);
 
+        Cache ::forget('today_appointments');
+
         return response()->json([
             'message' => 'Appointment created successfully',
             'appointment' => $appointment->load(['doctor', 'patient.user'])
@@ -106,7 +118,10 @@ class AppointmentController extends Controller
 
     public function update(Request $request, $id)
     {
+
+
         $appointment = $this->appointmentRepository->find($id);
+        Cache::forget('today_appointments');
 
         $data = $request->validate([
             'doctor_id' => 'required|exists:doctors,id',
@@ -146,7 +161,7 @@ class AppointmentController extends Controller
             'status' => $data['status'],
             'updated_by' => auth('api')->id(),
         ]);
-
+        Cache::forget('today_appointments');
         AuditLog::create([
             'user_id' => auth('api')->id(),
             'action' => 'appointment_status_updated',
@@ -195,6 +210,7 @@ class AppointmentController extends Controller
         $appointment = $this->appointmentRepository->find($id);
 
         $this->appointmentRepository->delete($appointment);
+        Cache::forget('today_appointments');
 
         return response()->json([
             'message' => 'Appointment deleted successfully'

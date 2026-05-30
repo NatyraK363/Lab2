@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PatientController;
 use App\Models\Role;
 
@@ -77,4 +78,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/medical-records', [MedicalRecordController::class, 'myPatients']);
     Route::get('/doctor/my-patients', [MedicalRecordController::class, 'myPatients']);
     Route::post('/medical-records', [MedicalRecordController::class, 'store']);
+
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
 });

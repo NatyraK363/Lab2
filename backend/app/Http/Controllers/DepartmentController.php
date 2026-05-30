@@ -4,13 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class DepartmentController extends Controller
 {
     public function index()
     {
         return response()->json(
-            Department::latest()->get()
+            Cache::remember(
+                'departments_list',
+                now()->addMinutes(10),
+                function () {
+                    return Department::latest()->get();
+                }
+            )
         );
     }
 
@@ -22,6 +29,8 @@ class DepartmentController extends Controller
         ]);
 
         $department = Department::create($data);
+
+        Cache::forget('departments_list');
 
         return response()->json($department, 201);
     }
@@ -37,6 +46,8 @@ class DepartmentController extends Controller
 
         $department->update($data);
 
+        Cache::forget('departments_list');
+
         return response()->json($department);
     }
 
@@ -44,6 +55,8 @@ class DepartmentController extends Controller
     {
         $department = Department::findOrFail($id);
         $department->delete();
+
+        Cache::forget('departments_list');
 
         return response()->json([
             'message' => 'Department deleted successfully'

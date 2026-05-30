@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\DoctorService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class DoctorController extends Controller
 {
@@ -17,8 +18,14 @@ class DoctorController extends Controller
     public function index()
     {
         return response()->json(
-            $this->doctorService->getAllDoctors()
-        );
+    Cache::remember(
+        'doctors_list',
+        now()->addMinutes(10),
+        function () {
+            return $this->doctorService->getAllDoctors();
+        }
+    )
+);
     }
 
     public function store(Request $request)
