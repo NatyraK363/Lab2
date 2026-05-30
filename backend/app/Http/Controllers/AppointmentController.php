@@ -9,8 +9,8 @@ use App\Repositories\AppointmentRepository;
 use App\Services\AppointmentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
 
 class AppointmentController extends Controller
 {
@@ -38,17 +38,16 @@ class AppointmentController extends Controller
         $query = Appointment::with(['doctor', 'patient.user']);
 
         if (in_array('admin', $roles) || in_array('receptionist', $roles)) {
-
-    return response()->json(
-        Cache::remember(
-            'today_appointments',
-            now()->addMinutes(5),
-            function () use ($query) {
-                return $query->latest()->get();
-            }
-        )
-    );
-}
+            return response()->json(
+                Cache::remember(
+                    'today_appointments',
+                    now()->addMinutes(5),
+                    function () use ($query) {
+                        return $query->latest()->get();
+                    }
+                )
+            );
+        }
 
         if (in_array('patient', $roles)) {
             $patient = $user->patient;
@@ -77,7 +76,8 @@ class AppointmentController extends Controller
     {
         $data = $request->validate([
             'doctor_id' => 'required|exists:doctors,id',
-            'appointment_date' => 'required|date|after_or_equal:today',            'appointment_time' => 'required',
+            'appointment_date' => 'required|date|after_or_equal:today',
+            'appointment_time' => 'required',
             'reason' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
@@ -108,7 +108,7 @@ class AppointmentController extends Controller
 
         $appointment = $this->appointmentRepository->create($data);
 
-        Cache ::forget('today_appointments');
+        Cache::forget('today_appointments');
 
         return response()->json([
             'message' => 'Appointment created successfully',
@@ -118,15 +118,12 @@ class AppointmentController extends Controller
 
     public function update(Request $request, $id)
     {
-
-
         $appointment = $this->appointmentRepository->find($id);
-        Cache::forget('today_appointments');
 
         $data = $request->validate([
             'doctor_id' => 'required|exists:doctors,id',
             'patient_id' => 'required|exists:patients,id',
-            'appointment_date' => 'required|date',
+            'appointment_date' => 'required|date|after_or_equal:today',
             'appointment_time' => 'required',
             'status' => 'required|in:pending,confirmed,completed,cancelled',
             'reason' => 'nullable|string',
@@ -140,6 +137,8 @@ class AppointmentController extends Controller
                 'updated_by' => auth('api')->id(),
             ]
         );
+
+        Cache::forget('today_appointments');
 
         return response()->json([
             'message' => 'Appointment updated successfully',
@@ -161,7 +160,9 @@ class AppointmentController extends Controller
             'status' => $data['status'],
             'updated_by' => auth('api')->id(),
         ]);
+
         Cache::forget('today_appointments');
+
         AuditLog::create([
             'user_id' => auth('api')->id(),
             'action' => 'appointment_status_updated',
@@ -177,13 +178,23 @@ class AppointmentController extends Controller
         ]);
 
         if ($appointment->patient?->user) {
-            Notification::create([
+            $notification = Notification::create([
                 'user_id' => $appointment->patient->user->id,
                 'type' => 'appointment',
                 'title' => 'Appointment Updated',
                 'message' => 'Your appointment status has been changed to: ' . ucfirst($data['status']),
                 'is_read' => false,
             ]);
+
+            Redis::publish('notifications', json_encode([
+                'id' => $notification->id,
+                'user_id' => $appointment->patient->user->id,
+                'title' => $notification->title,
+                'message' => $notification->message,
+                'type' => $notification->type,
+                'is_read' => false,
+                'created_at' => $notification->created_at,
+            ]));
         }
 
         if (
@@ -210,6 +221,7 @@ class AppointmentController extends Controller
         $appointment = $this->appointmentRepository->find($id);
 
         $this->appointmentRepository->delete($appointment);
+
         Cache::forget('today_appointments');
 
         return response()->json([

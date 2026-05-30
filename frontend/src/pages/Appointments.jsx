@@ -9,6 +9,11 @@ function Appointments() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [dateFilter, setDateFilter] = useState('')
+  const [sortOrder, setSortOrder] = useState('newest')
+
   const location = useLocation()
   const isBookMode = location.search.includes('mode=book')
 
@@ -122,6 +127,50 @@ function Appointments() {
     return 'bg-yellow-50 text-yellow-800'
   }
 
+  const filteredAppointments = appointments
+    .filter((appointment) => {
+      const patientName =
+        appointment.patient?.user?.name?.toLowerCase() || ''
+
+      const doctorName =
+        `${appointment.doctor?.first_name || ''} ${
+          appointment.doctor?.last_name || ''
+        }`.toLowerCase()
+
+      const reason =
+        appointment.reason?.toLowerCase() || ''
+
+      const searchText = search.toLowerCase()
+
+      const matchesSearch =
+        patientName.includes(searchText) ||
+        doctorName.includes(searchText) ||
+        reason.includes(searchText)
+
+      const matchesStatus = statusFilter
+        ? appointment.status === statusFilter
+        : true
+
+      const matchesDate = dateFilter
+        ? appointment.appointment_date === dateFilter
+        : true
+
+      return matchesSearch && matchesStatus && matchesDate
+    })
+    .sort((a, b) => {
+      const dateA = new Date(
+        `${a.appointment_date} ${a.appointment_time}`
+      )
+
+      const dateB = new Date(
+        `${b.appointment_date} ${b.appointment_time}`
+      )
+
+      return sortOrder === 'newest'
+        ? dateB - dateA
+        : dateA - dateB
+    })
+
   return (
     <div className="space-y-8">
       <div>
@@ -226,85 +275,134 @@ function Appointments() {
       )}
 
       {!isBookMode && (
-        <div className="bg-white border rounded-2xl overflow-hidden">
-          {appointments.length === 0 ? (
-            <p className="p-5 text-gray-500">No appointments found.</p>
-          ) : (
-            appointments.map((appointment) => (
-              <div key={appointment.id} className="p-5 border-b">
-                <h3 className="font-semibold text-blue-900">
-                  {isDoctor || isAdmin || isReceptionist
-                  ? `Patient: ${appointment.patient?.user?.name || 'Unknown patient'}`
-                   : `Dr. ${appointment.doctor?.first_name || ''} ${appointment.doctor?.last_name || ''}`}
-                </h3>
+        <>
+          <div className="bg-white border rounded-2xl p-5 shadow-sm">
+            <h2 className="text-lg font-semibold text-blue-900 mb-4">
+              Search & Filter Appointments
+            </h2>
 
-                {(isAdmin || isReceptionist) && (
-                <p className="text-sm text-gray-600">
-                Doctor: Dr. {appointment.doctor?.first_name} {appointment.doctor?.last_name}
-               </p>
-               )}
+            <div className="grid md:grid-cols-4 gap-4">
+              <input
+                className="border p-3 rounded-lg"
+                placeholder="Search patient, doctor or reason"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
 
-                <p className="text-sm text-gray-600">
-                  Date: {appointment.appointment_date} at {appointment.appointment_time}
-                </p>
+              <select
+                className="border p-3 rounded-lg"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
 
-                <p className="text-sm text-gray-600">
-                  Reason: {appointment.reason || 'No reason'}
-                </p>
+              <input
+                className="border p-3 rounded-lg"
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+              />
 
-                {appointment.notes && (
+              <select
+                className="border p-3 rounded-lg"
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+              </select>
+            </div>
+
+            <p className="text-sm text-gray-500 mt-3">
+              Showing {filteredAppointments.length} of {appointments.length} appointments
+            </p>
+          </div>
+
+          <div className="bg-white border rounded-2xl overflow-hidden">
+            {filteredAppointments.length === 0 ? (
+              <p className="p-5 text-gray-500">No appointments found.</p>
+            ) : (
+              filteredAppointments.map((appointment) => (
+                <div key={appointment.id} className="p-5 border-b">
+                  <h3 className="font-semibold text-blue-900">
+                    {isDoctor || isAdmin || isReceptionist
+                      ? `Patient: ${appointment.patient?.user?.name || 'Unknown patient'}`
+                      : `Dr. ${appointment.doctor?.first_name || ''} ${appointment.doctor?.last_name || ''}`}
+                  </h3>
+
+                  {(isAdmin || isReceptionist) && (
+                    <p className="text-sm text-gray-600">
+                      Doctor: Dr. {appointment.doctor?.first_name} {appointment.doctor?.last_name}
+                    </p>
+                  )}
+
                   <p className="text-sm text-gray-600">
-                    Notes: {appointment.notes}
+                    Date: {appointment.appointment_date} at {appointment.appointment_time}
                   </p>
-                )}
 
-                <span
-                  className={`inline-block mt-2 text-xs px-2 py-1 rounded capitalize ${getStatusClass(
-                    appointment.status
-                  )}`}
-                >
-                  {appointment.status}
-                </span>
+                  <p className="text-sm text-gray-600">
+                    Reason: {appointment.reason || 'No reason'}
+                  </p>
 
-                {isDoctor && (
-                  <button
-                    onClick={() => {
-                      window.location.href = '/patients'
-                    }}
-                    className="block mt-4 bg-blue-900 text-white px-4 py-2 rounded-lg text-sm"
+                  {appointment.notes && (
+                    <p className="text-sm text-gray-600">
+                      Notes: {appointment.notes}
+                    </p>
+                  )}
+
+                  <span
+                    className={`inline-block mt-2 text-xs px-2 py-1 rounded capitalize ${getStatusClass(
+                      appointment.status
+                    )}`}
                   >
-                    Add Diagnosis
-                  </button>
-                )}
+                    {appointment.status}
+                  </span>
 
-                {canManageAppointment && (
-                  <div className="flex gap-2 mt-3 flex-wrap">
+                  {isDoctor && (
                     <button
-                      onClick={() => handleStatusChange(appointment.id, 'confirmed')}
-                      className="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm"
+                      onClick={() => {
+                        window.location.href = '/patients'
+                      }}
+                      className="block mt-4 bg-blue-900 text-white px-4 py-2 rounded-lg text-sm"
                     >
-                      Confirm
+                      Add Diagnosis
                     </button>
+                  )}
 
-                    <button
-                      onClick={() => handleStatusChange(appointment.id, 'completed')}
-                      className="bg-green-100 text-green-700 px-3 py-1 rounded text-sm"
-                    >
-                      Complete
-                    </button>
+                  {canManageAppointment && (
+                    <div className="flex gap-2 mt-3 flex-wrap">
+                      <button
+                        onClick={() => handleStatusChange(appointment.id, 'confirmed')}
+                        className="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm"
+                      >
+                        Confirm
+                      </button>
 
-                    <button
-                      onClick={() => handleStatusChange(appointment.id, 'cancelled')}
-                      className="bg-red-100 text-red-700 px-3 py-1 rounded text-sm"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
+                      <button
+                        onClick={() => handleStatusChange(appointment.id, 'completed')}
+                        className="bg-green-100 text-green-700 px-3 py-1 rounded text-sm"
+                      >
+                        Complete
+                      </button>
+
+                      <button
+                        onClick={() => handleStatusChange(appointment.id, 'cancelled')}
+                        className="bg-red-100 text-red-700 px-3 py-1 rounded text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </>
       )}
     </div>
   )
