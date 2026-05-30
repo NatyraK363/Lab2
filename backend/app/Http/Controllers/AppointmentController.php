@@ -4,14 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\AuditLog;
-use App\Models\Setting;
+use App\Models\Notification;
+use App\Repositories\AppointmentRepository;
+use App\Services\AppointmentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use App\Models\Notification;
-use Carbon\Carbon;
 
 class AppointmentController extends Controller
 {
+    protected $appointmentService;
+    protected $appointmentRepository;
+
+    public function __construct(
+        AppointmentService $appointmentService,
+        AppointmentRepository $appointmentRepository
+    ) {
+        $this->appointmentService = $appointmentService;
+        $this->appointmentRepository = $appointmentRepository;
+    }
+
     public function index()
     {
         $user = auth('api')->user();
@@ -69,22 +80,13 @@ class AppointmentController extends Controller
             ], 404);
         }
 
-        $duration = (int) (
-            Setting::where('key', 'appointment_duration')->value('value') ?? 30
+        $available = $this->appointmentService->isDoctorAvailable(
+            $data['doctor_id'],
+            $data['appointment_date'],
+            $data['appointment_time']
         );
 
-        $requestedTime = Carbon::parse($data['appointment_time']);
-
-        $startTime = $requestedTime->copy()->subMinutes($duration)->format('H:i:s');
-        $endTime = $requestedTime->copy()->addMinutes($duration)->format('H:i:s');
-
-        $exists = Appointment::where('doctor_id', $data['doctor_id'])
-            ->where('appointment_date', $data['appointment_date'])
-            ->whereIn('status', ['pending', 'confirmed'])
-            ->whereBetween('appointment_time', [$startTime, $endTime])
-            ->exists();
-
-        if ($exists) {
+        if (!$available) {
             return response()->json([
                 'message' => 'This doctor is not available at this time. Please choose another time.'
             ], 422);
@@ -94,7 +96,7 @@ class AppointmentController extends Controller
         $data['status'] = 'pending';
         $data['created_by'] = auth('api')->id();
 
-        $appointment = Appointment::create($data);
+        $appointment = $this->appointmentRepository->create($data);
 
         return response()->json([
             'message' => 'Appointment created successfully',
@@ -104,7 +106,7 @@ class AppointmentController extends Controller
 
     public function update(Request $request, $id)
     {
-        $appointment = Appointment::findOrFail($id);
+        $appointment = $this->appointmentRepository->find($id);
 
         $data = $request->validate([
             'doctor_id' => 'required|exists:doctors,id',
@@ -116,10 +118,13 @@ class AppointmentController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $appointment->update([
-            ...$data,
-            'updated_by' => auth('api')->id(),
-        ]);
+        $appointment = $this->appointmentRepository->update(
+            $appointment,
+            [
+                ...$data,
+                'updated_by' => auth('api')->id(),
+            ]
+        );
 
         return response()->json([
             'message' => 'Appointment updated successfully',
@@ -129,7 +134,7 @@ class AppointmentController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        $appointment = Appointment::with(['doctor', 'patient.user'])->findOrFail($id);
+        $appointment = $this->appointmentRepository->find($id);
 
         $oldStatus = $appointment->status;
 
@@ -141,8 +146,6 @@ class AppointmentController extends Controller
             'status' => $data['status'],
             'updated_by' => auth('api')->id(),
         ]);
-
-        $appointment->load(['doctor', 'patient.user']);
 
         AuditLog::create([
             'user_id' => auth('api')->id(),
@@ -159,17 +162,19 @@ class AppointmentController extends Controller
         ]);
 
         if ($appointment->patient?->user) {
+            Notification::create([
+                'user_id' => $appointment->patient->user->id,
+                'type' => 'appointment',
+                'title' => 'Appointment Updated',
+                'message' => 'Your appointment status has been changed to: ' . ucfirst($data['status']),
+                'is_read' => false,
+            ]);
+        }
 
-    Notification::create([
-        'user_id' => $appointment->patient->user->id,
-        'type' => 'appointment',
-        'title' => 'Appointment Updated',
-        'message' => 'Your appointment status has been changed to: ' . ucfirst($data['status']),
-        'is_read' => false,
-    ]);
-}
-
-        if ($data['status'] === 'confirmed' && $appointment->patient?->user?->email) {
+        if (
+            $data['status'] === 'confirmed' &&
+            $appointment->patient?->user?->email
+        ) {
             Mail::raw(
                 'Your appointment has been confirmed.',
                 function ($message) use ($appointment) {
@@ -181,13 +186,15 @@ class AppointmentController extends Controller
 
         return response()->json([
             'message' => 'Appointment status updated successfully',
-            'appointment' => $appointment
+            'appointment' => $appointment->load(['doctor', 'patient.user'])
         ]);
     }
 
     public function destroy($id)
     {
-        Appointment::findOrFail($id)->delete();
+        $appointment = $this->appointmentRepository->find($id);
+
+        $this->appointmentRepository->delete($appointment);
 
         return response()->json([
             'message' => 'Appointment deleted successfully'
