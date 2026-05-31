@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\DoctorService;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -15,18 +16,56 @@ class DoctorController extends Controller
         $this->doctorService = $doctorService;
     }
 
-    public function index()
-    {
+ public function index(Request $request)
+{
+    $search = $request->query('search');
+    $departmentId = $request->query('department_id');
+
+    if ($search || $departmentId) {
+  $cleanSearch = $search
+    ? Str::slug($search, '_')
+    : 'all';
+
+        $cacheKey = 'search_doctors_' . $cleanSearch . '_dep_' . ($departmentId ?: 'all');
+
         return response()->json(
-    Cache::remember(
-        'doctors_list',
-        now()->addMinutes(10),
-        function () {
-            return $this->doctorService->getAllDoctors();
-        }
-    )
-);
+            Cache::remember(
+                $cacheKey,
+                now()->addMinutes(5),
+                function () use ($search, $departmentId) {
+                    return \App\Models\Doctor::with(['user', 'department', 'specialty'])
+                        ->when($search, function ($query) use ($search) {
+                            $query->where(function ($q) use ($search) {
+                                $q->where('first_name', 'like', "%{$search}%")
+                                    ->orWhere('last_name', 'like', "%{$search}%")
+                                    ->orWhereHas('department', function ($d) use ($search) {
+                                        $d->where('name', 'like', "%{$search}%");
+                                    })
+                                    ->orWhereHas('specialty', function ($s) use ($search) {
+                                        $s->where('name', 'like', "%{$search}%");
+                                    });
+                            });
+                        })
+                        ->when($departmentId, function ($query) use ($departmentId) {
+                            $query->where('department_id', $departmentId);
+                        })
+                        ->latest()
+                        ->get();
+                }
+            )
+        );
     }
+
+    return response()->json(
+        Cache::remember(
+            'doctors_list',
+            now()->addMinutes(10),
+            function () {
+                return $this->doctorService->getAllDoctors();
+            }
+        )
+    );
+}
 
     public function store(Request $request)
     {

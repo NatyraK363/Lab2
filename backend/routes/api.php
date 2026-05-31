@@ -11,6 +11,7 @@ use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\PatientController;
 use App\Models\Role;
 
@@ -29,6 +30,8 @@ Route::post('/logout', [AuthController::class, 'logout']);
 Route::get('/departments', [DepartmentController::class, 'index']);
 Route::get('/specialties', [SpecialtyController::class, 'index']);
 Route::get('/doctors', [DoctorController::class, 'index']);
+Route::get('/exports/{type}', [ExportController::class, 'export']);
+
 /*
 |--------------------------------------------------------------------------
 | Protected routes
@@ -79,8 +82,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/doctor/my-patients', [MedicalRecordController::class, 'myPatients']);
     Route::post('/medical-records', [MedicalRecordController::class, 'store']);
     Route::put('/medical-records/{id}', [MedicalRecordController::class, 'update']);
-Route::delete('/medical-records/{id}', [MedicalRecordController::class, 'destroy']);
+    Route::delete('/medical-records/{id}', [MedicalRecordController::class, 'destroy']);
 
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+
 });

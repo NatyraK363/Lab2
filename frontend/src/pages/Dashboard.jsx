@@ -20,6 +20,26 @@ function Dashboard() {
     completed: 0,
   })
 
+  const handleExport = async (type) => {
+  try {
+    const res = await api.get(`/exports/${type}?format=csv`, {
+      responseType: 'blob',
+    })
+
+    const url = window.URL.createObjectURL(new Blob([res.data]))
+    const link = document.createElement('a')
+
+    link.href = url
+    link.setAttribute('download', `${type}_export.csv`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+  } catch (err) {
+    console.log('Export error:', err.response?.data)
+    alert('Export could not be downloaded.')
+  }
+}
+
   useEffect(() => {
     if (activeRole === 'admin') {
       fetchStats()
@@ -63,6 +83,37 @@ function Dashboard() {
           </p>
         </div>
 
+   <div className="bg-white border rounded-2xl p-6 shadow-sm">
+  <h2 className="text-xl font-semibold text-blue-900 mb-4">
+    Data Export
+  </h2>
+
+  <p className="text-gray-600 mb-5">
+    Export clinic data as CSV. Exported data is cached in Redis.
+  </p>
+
+  <div className="flex flex-wrap gap-3">
+    <button onClick={() => handleExport('users')} className="bg-blue-900 text-white px-4 py-2 rounded-lg">
+      Export Users
+    </button>
+
+    <button onClick={() => handleExport('doctors')} className="bg-blue-900 text-white px-4 py-2 rounded-lg">
+      Export Doctors
+    </button>
+
+    <button onClick={() => handleExport('patients')} className="bg-blue-900 text-white px-4 py-2 rounded-lg">
+      Export Patients
+    </button>
+
+    <button onClick={() => handleExport('departments')} className="bg-blue-900 text-white px-4 py-2 rounded-lg">
+      Export Departments
+    </button>
+
+    <button onClick={() => handleExport('appointments')} className="bg-blue-900 text-white px-4 py-2 rounded-lg">
+      Export Appointments
+    </button>
+  </div>
+</div>
         <div className="grid md:grid-cols-4 gap-6">
           <div className="bg-white border rounded-2xl p-6 shadow-sm">
             <p className="text-gray-500 text-sm">Total Users</p>
@@ -92,6 +143,53 @@ function Dashboard() {
             </h2>
           </div>
         </div>
+
+        <div className="bg-white border rounded-2xl p-6 shadow-sm">
+  <h2 className="text-xl font-semibold text-blue-900 mb-4">
+    Data Export
+  </h2>
+
+  <p className="text-gray-600 mb-5">
+    Export clinic data as CSV. Exported data is cached in Redis.
+  </p>
+
+  <div className="flex flex-wrap gap-3">
+    <button
+      onClick={() => handleExport('users')}
+      className="bg-blue-900 text-white px-4 py-2 rounded-lg"
+    >
+      Export Users
+    </button>
+
+    <button
+      onClick={() => handleExport('doctors')}
+      className="bg-blue-900 text-white px-4 py-2 rounded-lg"
+    >
+      Export Doctors
+    </button>
+
+    <button
+      onClick={() => handleExport('patients')}
+      className="bg-blue-900 text-white px-4 py-2 rounded-lg"
+    >
+      Export Patients
+    </button>
+
+    <button
+      onClick={() => handleExport('departments')}
+      className="bg-blue-900 text-white px-4 py-2 rounded-lg"
+    >
+      Export Departments
+    </button>
+
+    <button
+      onClick={() => handleExport('appointments')}
+      className="bg-blue-900 text-white px-4 py-2 rounded-lg"
+    >
+      Export Appointments
+    </button>
+  </div>
+</div>
 
         <div className="grid md:grid-cols-4 gap-6">
           <Link
@@ -197,6 +295,27 @@ function Dashboard() {
           </p>
         </Link>
       </div>
+      <div className="bg-white border rounded-2xl p-6 shadow-sm">
+  <h2 className="text-xl font-semibold text-blue-900 mb-4">
+    Data Export
+  </h2>
+
+  <div className="flex gap-3">
+    <button
+      onClick={() => handleExport('patients')}
+      className="bg-blue-900 text-white px-4 py-2 rounded-lg"
+    >
+      Export Patients
+    </button>
+
+    <button
+      onClick={() => handleExport('appointments')}
+      className="bg-blue-900 text-white px-4 py-2 rounded-lg"
+    >
+      Export Appointments
+    </button>
+  </div>
+</div>
     </div>
   )
 }
@@ -282,6 +401,27 @@ function Dashboard() {
             </p>
           </Link>
         </div>
+        <div className="bg-white border rounded-2xl p-6 shadow-sm">
+  <h2 className="text-xl font-semibold text-blue-900 mb-4">
+    Data Export
+  </h2>
+
+  <div className="flex gap-3">
+    <button
+      onClick={() => handleExport('patients')}
+      className="bg-blue-900 text-white px-4 py-2 rounded-lg"
+    >
+      Export My Patients
+    </button>
+
+    <button
+      onClick={() => handleExport('appointments')}
+      className="bg-blue-900 text-white px-4 py-2 rounded-lg"
+    >
+      Export My Appointments
+    </button>
+  </div>
+</div>
       </div>
     )
   }
@@ -343,6 +483,18 @@ function Dashboard() {
           </p>
         </div>
       </div>
+      <div className="bg-white border rounded-2xl p-6 shadow-sm">
+  <h2 className="text-xl font-semibold text-blue-900 mb-4">
+    Data Export
+  </h2>
+
+  <button
+    onClick={() => handleExport('appointments')}
+    className="bg-blue-900 text-white px-4 py-2 rounded-lg"
+  >
+    Export My Appointments
+  </button>
+</div>
     </div>
   )
 }

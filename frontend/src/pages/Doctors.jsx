@@ -47,13 +47,19 @@ const [sortOrder, setSortOrder] = useState('az')
   }
 
   const fetchDoctors = async () => {
-    try {
-      const res = await api.get('/doctors')
-      setDoctors(res.data)
-    } catch (err) {
-      console.log('Fetch doctors error:', err.response?.data)
-    }
+  try {
+    const res = await api.get('/doctors', {
+      params: {
+        search,
+        department_id: departmentFilter,
+      },
+    })
+
+    setDoctors(res.data)
+  } catch (err) {
+    console.log('Fetch doctors error:', err.response?.data)
   }
+}
 
   const fetchDepartments = async () => {
     try {
@@ -83,14 +89,17 @@ const [sortOrder, setSortOrder] = useState('az')
   }
 
   useEffect(() => {
-    fetchDoctors()
-    fetchDepartments()
-    fetchSpecialties()
+  fetchDepartments()
+  fetchSpecialties()
 
-    if (isAdmin) {
-      fetchUsers()
-    }
-  }, [isAdmin])
+  if (isAdmin) {
+    fetchUsers()
+  }
+}, [isAdmin])
+
+useEffect(() => {
+  fetchDoctors()
+}, [search, departmentFilter])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
