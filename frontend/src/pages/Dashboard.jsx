@@ -6,6 +6,10 @@ function Dashboard() {
   const user = JSON.parse(localStorage.getItem('user'))
   const activeRole = localStorage.getItem('activeRole')
 
+  const [importType, setImportType] = useState('')
+  const [importRows, setImportRows] = useState([])
+  const [importFile, setImportFile] = useState(null)
+
   const [stats, setStats] = useState({
     total_users: 0,
     total_doctors: 0,
@@ -37,6 +41,78 @@ function Dashboard() {
   } catch (err) {
     console.log('Export error:', err.response?.data)
     alert('Export could not be downloaded.')
+  }
+}
+
+const handleImportPreview = (type, file) => {
+  if (!file) return
+
+  setImportType(type)
+  setImportFile(file)
+
+  const reader = new FileReader()
+
+  reader.onload = (event) => {
+    const text = event.target.result
+    const lines = text.split('\n').filter((line) => line.trim() !== '')
+    const headers = lines[0].split(',').map((h) => h.trim())
+
+    const rows = lines.slice(1).map((line) => {
+      const values = line.split(',').map((v) => v.trim())
+      const row = {}
+
+      headers.forEach((header, index) => {
+        row[header] = values[index] || ''
+      })
+
+      return row
+    })
+
+    setImportRows(rows)
+  }
+
+  reader.readAsText(file)
+}
+
+const handleSaveImport = async () => {
+  if (!importFile || !importType) return
+
+  const formData = new FormData()
+  formData.append('file', importFile)
+
+  try {
+    await api.post(`/imports/${importType}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    alert(`${importType} imported successfully.`)
+    setImportType('')
+    setImportRows([])
+    setImportFile(null)
+  } catch (err) {
+    console.log('Import error:', err.response?.data)
+    alert('Import failed.')
+  }
+}
+const handleImport = async (type, file) => {
+  if (!file) return
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  try {
+    await api.post(`/imports/${type}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    alert(`${type} imported successfully.`)
+  } catch (err) {
+    console.log('Import error:', err.response?.data)
+    alert('Import failed.')
   }
 }
 
@@ -114,6 +190,88 @@ function Dashboard() {
     </button>
   </div>
 </div>
+<div className="mt-6 border-t pt-5">
+  <h3 className="text-lg font-semibold text-blue-900 mb-3">
+    Data Import
+  </h3>
+
+  <p className="text-gray-600 mb-4">
+    Choose a CSV file, preview the data, then save it to MySQL. Redis cache is cleared after import.
+  </p>
+
+  <div className="grid md:grid-cols-2 gap-4">
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        Import Departments CSV
+      </label>
+
+      <input
+        type="file"
+        accept=".csv"
+        className="border p-3 rounded-lg w-full"
+        onChange={(e) =>
+          handleImportPreview('departments', e.target.files[0])
+        }
+      />
+    </div>
+
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        Import Specialties CSV
+      </label>
+
+      <input
+        type="file"
+        accept=".csv"
+        className="border p-3 rounded-lg w-full"
+        onChange={(e) =>
+          handleImportPreview('specialties', e.target.files[0])
+        }
+      />
+    </div>
+  </div>
+
+  {importRows.length > 0 && (
+    <div className="mt-6">
+      <h4 className="font-semibold text-blue-900 mb-3">
+        Preview: {importType}
+      </h4>
+
+      <div className="overflow-x-auto border rounded-xl">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              {Object.keys(importRows[0]).map((key) => (
+                <th key={key} className="p-3 text-left">
+                  {key}
+                </th>
+              ))}
+            </tr>
+          </thead>
+
+          <tbody>
+            {importRows.map((row, index) => (
+              <tr key={index} className="border-t">
+                {Object.values(row).map((value, i) => (
+                  <td key={i} className="p-3">
+                    {value}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <button
+        onClick={handleSaveImport}
+        className="mt-4 bg-green-700 text-white px-5 py-2 rounded-lg"
+      >
+        Save Import
+      </button>
+    </div>
+  )}
+</div>
         <div className="grid md:grid-cols-4 gap-6">
           <div className="bg-white border rounded-2xl p-6 shadow-sm">
             <p className="text-gray-500 text-sm">Total Users</p>
@@ -144,52 +302,7 @@ function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white border rounded-2xl p-6 shadow-sm">
-  <h2 className="text-xl font-semibold text-blue-900 mb-4">
-    Data Export
-  </h2>
-
-  <p className="text-gray-600 mb-5">
-    Export clinic data as CSV. Exported data is cached in Redis.
-  </p>
-
-  <div className="flex flex-wrap gap-3">
-    <button
-      onClick={() => handleExport('users')}
-      className="bg-blue-900 text-white px-4 py-2 rounded-lg"
-    >
-      Export Users
-    </button>
-
-    <button
-      onClick={() => handleExport('doctors')}
-      className="bg-blue-900 text-white px-4 py-2 rounded-lg"
-    >
-      Export Doctors
-    </button>
-
-    <button
-      onClick={() => handleExport('patients')}
-      className="bg-blue-900 text-white px-4 py-2 rounded-lg"
-    >
-      Export Patients
-    </button>
-
-    <button
-      onClick={() => handleExport('departments')}
-      className="bg-blue-900 text-white px-4 py-2 rounded-lg"
-    >
-      Export Departments
-    </button>
-
-    <button
-      onClick={() => handleExport('appointments')}
-      className="bg-blue-900 text-white px-4 py-2 rounded-lg"
-    >
-      Export Appointments
-    </button>
-  </div>
-</div>
+        
 
         <div className="grid md:grid-cols-4 gap-6">
           <Link

@@ -31,6 +31,7 @@ Route::get('/departments', [DepartmentController::class, 'index']);
 Route::get('/specialties', [SpecialtyController::class, 'index']);
 Route::get('/doctors', [DoctorController::class, 'index']);
 Route::get('/exports/{type}', [ExportController::class, 'export']);
+Route::post('/imports/{type}', [ExportController::class, 'import']);
 
 /*
 |--------------------------------------------------------------------------

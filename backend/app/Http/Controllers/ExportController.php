@@ -116,4 +116,54 @@ class ExportController extends Controller
             'Content-Type' => 'text/csv',
         ]);
     }
+
+    public function import(Request $request, $type)
+{
+    $request->validate([
+        'file' => 'required|file|mimes:csv,txt',
+    ]);
+
+    $file = fopen($request->file('file')->getRealPath(), 'r');
+
+    $header = fgetcsv($file);
+
+    $imported = 0;
+
+    while (($row = fgetcsv($file)) !== false) {
+        $data = array_combine($header, $row);
+
+        if ($type === 'departments') {
+            \App\Models\Department::updateOrCreate(
+                ['name' => $data['name']],
+                [
+                    'description' => $data['description'] ?? null,
+                ]
+            );
+
+            $imported++;
+        }
+
+        if ($type === 'specialties') {
+            \App\Models\Specialty::updateOrCreate(
+                ['name' => $data['name']],
+                [
+                    'description' => $data['description'] ?? null,
+                ]
+            );
+
+            $imported++;
+        }
+    }
+
+    fclose($file);
+
+    Cache::forget('departments_list');
+    Cache::forget('specialties_list');
+
+    return response()->json([
+        'message' => 'Import completed successfully',
+        'type' => $type,
+        'imported_rows' => $imported,
+    ]);
+}
 }
