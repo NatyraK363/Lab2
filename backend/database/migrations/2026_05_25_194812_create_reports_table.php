@@ -14,15 +14,15 @@ return new class extends Migration
     public function up()
     {
        Schema::create('reports', function (Blueprint $table) {
-    $table->id();
-    $table->string('title');
-    $table->string('type');
-    $table->date('from_date')->nullable();
-    $table->date('to_date')->nullable();
-    $table->text('description')->nullable();
-    $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-    $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
-    $table->timestamps();
+        $table->id();
+        $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+        $table->string('title');
+        $table->string('type');
+        $table->date('from_date')->nullable();
+        $table->date('to_date')->nullable();
+        $table->json('filters')->nullable();
+        $table->json('data')->nullable();
+        $table->timestamps();
 });
     }
 

@@ -348,6 +348,18 @@ const handleImport = async (type, file) => {
               View and manage appointments.
             </p>
           </Link>
+
+          <Link
+          to="/reports"
+          className="bg-white border rounded-2xl p-6 hover:shadow-md transition"
+          >
+          <h3 className="text-xl font-semibold text-blue-900">
+          Reports
+         </h3>
+   <p className="text-gray-600 mt-2">
+    Generate dynamic reports and analytics.
+  </p>
+</Link>
         </div>
       </div>
     )

@@ -14,6 +14,7 @@ import ChooseRole from './pages/ChooseRole'
 import MyPatients from './pages/MyPatients'
 import api from './api/axios'
 import Profile from './pages/Profile'
+import Reports from './pages/Reports'
 import socket from './socket'
 
 function App() {
@@ -224,6 +225,7 @@ function App() {
           <Route path="/departments" element={<Departments />} />
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/reports" element={<Reports />} />
           <Route path="/medical-records" element={<MedicalRecord />} />
           <Route path="/appointments" element={<Appointments />} />
           <Route path="/doctors" element={<Doctors />} />

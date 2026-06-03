@@ -13,6 +13,7 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PatientController;
 use App\Models\Role;
 
@@ -83,7 +84,12 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::post('/profile/photo', [ProfileController::class, 'uploadPhoto']);
     Route::post('/profile/update', [ProfileController::class, 'update']);
-    
+
+    Route::get('/reports', [ReportController::class, 'index']);
+    Route::post('/reports/generate', [ReportController::class, 'generate']);
+    Route::get('/reports/{id}', [ReportController::class, 'show']);
+    Route::delete('/reports/{id}', [ReportController::class, 'destroy']);
+
     Route::get('/medical-records', [MedicalRecordController::class, 'myPatients']);
     Route::get('/doctor/my-patients', [MedicalRecordController::class, 'myPatients']);
     Route::post('/medical-records', [MedicalRecordController::class, 'store']);
