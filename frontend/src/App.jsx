@@ -13,6 +13,7 @@ import Appointments from './pages/Appointments'
 import ChooseRole from './pages/ChooseRole'
 import MyPatients from './pages/MyPatients'
 import api from './api/axios'
+import Profile from './pages/Profile'
 import socket from './socket'
 
 function App() {
@@ -127,6 +128,10 @@ function App() {
                 Dashboard
               </Link>
 
+              <Link className="text-gray-700 hover:text-blue-900" to="/profile">
+                Profile
+              </Link>
+
               {(activeRole === 'patient' || activeRole === 'doctor') && (
   <div className="relative">
     <button
@@ -218,6 +223,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/departments" element={<Departments />} />
           <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/medical-records" element={<MedicalRecord />} />
           <Route path="/appointments" element={<Appointments />} />
           <Route path="/doctors" element={<Doctors />} />

@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\PatientController;
@@ -79,6 +80,10 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/files', [FileController::class, 'index']);
     Route::post('/files/upload', [FileController::class, 'upload']);
 
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::post('/profile/photo', [ProfileController::class, 'uploadPhoto']);
+    Route::post('/profile/update', [ProfileController::class, 'update']);
+    
     Route::get('/medical-records', [MedicalRecordController::class, 'myPatients']);
     Route::get('/doctor/my-patients', [MedicalRecordController::class, 'myPatients']);
     Route::post('/medical-records', [MedicalRecordController::class, 'store']);
