@@ -8,28 +8,45 @@ use App\Models\Patient;
 use App\Models\Department;
 use App\Models\Appointment;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Cache;
 
 class ExportController extends Controller
 {
     public function export(Request $request, $type)
-    {
-        $format = $request->query('format', 'csv');
+{
+    $format = $request->query('format', 'csv');
 
-        if ($format !== 'csv') {
-            return response()->json([
-                'message' => 'Only CSV export is supported for now.'
-            ], 422);
-        }
-
-        $cacheKey = 'export_' . $type . '_csv';
-
-        $data = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($type) {
-            return $this->getExportData($type);
-        });
-
-        return $this->downloadCsv($data, $type . '_export.csv');
+    if (!in_array($format, ['csv', 'json', 'xlsx'])) {
+        return response()->json([
+            'message' => 'Only CSV, JSON and Excel exports are supported.'
+        ], 422);
     }
+
+    $cacheKey = 'export_' . $type . '_' . $format;
+
+    $data = Cache::remember(
+        $cacheKey,
+        now()->addMinutes(10),
+        fn() => $this->getExportData($type)
+    );
+
+    if ($format === 'json') {
+        return response()->json($data);
+    }
+
+    if ($format === 'xlsx') {
+        return Excel::download(
+            new \App\Exports\ArrayExport($data),
+            $type . '_export.xlsx'
+        );
+    }
+
+    return $this->downloadCsv(
+        $data,
+        $type . '_export.csv'
+    );
+}
 
     private function getExportData($type)
     {
