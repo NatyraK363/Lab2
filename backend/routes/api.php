@@ -15,6 +15,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\EmergencyContactController;
 use App\Models\Role;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -33,6 +34,7 @@ Route::get('/departments', [DepartmentController::class, 'index']);
 Route::get('/specialties', [SpecialtyController::class, 'index']);
 Route::get('/doctors', [DoctorController::class, 'index']);
 Route::get('/exports/{type}', [ExportController::class, 'export']);
+Route::get('/emergency-contacts', [EmergencyContactController::class, 'index']);
 Route::post('/imports/{type}', [ExportController::class, 'import']);
 
 /*
@@ -98,5 +100,10 @@ Route::middleware('auth:api')->group(function () {
 
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+
+    Route::post('/emergency-contacts', [EmergencyContactController::class, 'store']);
+    Route::get('/emergency-contacts/mine', [EmergencyContactController::class, 'showMine']);
+    Route::delete('/emergency-contacts/{id}', [EmergencyContactController::class, 'destroy']);
+
 
 });

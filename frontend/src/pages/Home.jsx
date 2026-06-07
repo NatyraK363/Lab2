@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import home from '../assets/images/home.png'
 
 function Home() {
   const token = localStorage.getItem('token')
@@ -132,6 +133,17 @@ function Home() {
               Manage clinic departments.
             </p>
           </Link>
+          <Link
+          to="/AdminEmergencyContact"
+          className="bg-white border rounded-2xl p-6 hover:shadow-md transition"
+          >
+       <h3 className="text-xl font-semibold text-blue-900">
+      Emergency Contacts
+  </h3>
+  <p className="text-gray-600 mt-2">
+    Add emergency contacts for patients.
+  </p>
+</Link>
         </div>
       </div>
     )
@@ -191,6 +203,19 @@ function Home() {
             View patient information.
           </p>
         </Link>
+
+        <Link
+        to="/AdminEmergencyContact"
+        className="bg-white border rounded-2xl p-6 hover:shadow-md transition"
+        >
+  <h3 className="text-xl font-semibold text-blue-900">
+    Emergency Contacts
+  </h3>
+
+  <p className="text-gray-600 mt-2">
+    Add emergency contacts for patients.
+  </p>
+</Link>
       </div>
     </div>
   )
@@ -284,6 +309,13 @@ return (
           >
             Contact
           </a>
+          <Link
+          to="/emergency-contacts"
+          className="border border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-semibold"
+           >
+          Emergency Contacts
+        </Link>
+          
         </div>
 
         <p className="text-sm text-gray-500 mt-4">
@@ -291,19 +323,13 @@ return (
         </p>
       </div>
 
-      <div className="bg-gradient-to-br from-blue-100 to-blue-50 h-full min-h-[430px] flex items-center justify-center">
-        <div className="bg-white rounded-3xl p-8 shadow-md max-w-sm">
-          <div className="text-6xl mb-5">🩺</div>
-
-          <h3 className="text-2xl font-bold text-blue-900">
-            Trusted Healthcare
-          </h3>
-
-          <p className="text-gray-600 mt-3">
-            Doctors, departments, appointments and patient care in one secure platform.
-          </p>
-        </div>
-      </div>
+   <div className="bg-gradient-to-br from-blue-100 to-blue-50 min-h-[500px]">
+  <img
+    src={home}
+    alt="SmartCare Clinic"
+    className="w-full h-full min-h-[500px] object-cover"
+  />
+</div>
     </section>
 
     <section id="about" className="bg-white rounded-3xl border p-10 shadow-sm">

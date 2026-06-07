@@ -15,6 +15,9 @@ import MyPatients from './pages/MyPatients'
 import api from './api/axios'
 import Profile from './pages/Profile'
 import Reports from './pages/Reports'
+import AdminEmergencyContact from './pages/AdminEmergencyContact'
+import EmergencyContact from './pages/EmergencyContact'
+import logo from './assets/images/logo.png'
 import socket from './socket'
 
 function App() {
@@ -108,15 +111,23 @@ function App() {
       )}
 
       <nav className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-blue-900">
-            SmartCare Clinic
-          </h1>
+       <div className="flex items-center gap-3">
+  <img
+    src={logo}
+    alt="SmartCare Clinic"
+    className="h-14 w-auto"
+  />
 
-          <p className="text-xs text-gray-500">
-            Clinic Management System
-          </p>
-        </div>
+  <div>
+    <h1 className="text-2xl font-bold text-blue-900">
+      SmartCare Clinic
+    </h1>
+
+    <p className="text-gray-500 text-sm">
+      Clinic Management System
+    </p>
+  </div>
+</div>
 
         <div className="flex gap-6 text-sm items-center">
           {token ? (
@@ -226,8 +237,10 @@ function App() {
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/emergency-contacts" element={<EmergencyContact />} />
           <Route path="/medical-records" element={<MedicalRecord />} />
           <Route path="/appointments" element={<Appointments />} />
+          <Route path="/AdminEmergencyContact" element={<AdminEmergencyContact />}/>
           <Route path="/doctors" element={<Doctors />} />
 
           <Route
