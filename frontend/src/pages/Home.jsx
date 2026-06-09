@@ -66,88 +66,89 @@ function Home() {
     )
   }
 
-  if (token && user && isAdmin) {
-    return (
-      <div className="space-y-8">
-        <div className="bg-white border rounded-2xl p-8 shadow-sm">
-          <h1 className="text-3xl font-bold text-blue-900">
-            Welcome back, {user.name}
-          </h1>
+ if (token && user && isAdmin) {
+  return (
+    <div className="space-y-8">
+      <div className="bg-white border rounded-2xl p-8 shadow-sm">
+        <h1 className="text-3xl font-bold text-blue-900">
+          Welcome back, {user.name}
+        </h1>
 
-          <p className="text-gray-600 mt-2">
-            Manage clinic users, doctors, appointments and system data.
+        <p className="text-gray-600 mt-2">
+          Manage clinic users, doctors, appointments and system data.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-6">
+        <Link
+          to="/dashboard"
+          className="bg-blue-900 text-white rounded-2xl p-6 hover:bg-blue-800 transition"
+        >
+          <h3 className="text-xl font-semibold">Admin Dashboard</h3>
+          <p className="text-blue-100 mt-2">
+            View clinic overview and statistics.
           </p>
-        </div>
+        </Link>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          <Link
-            to="/dashboard"
-            className="bg-blue-900 text-white rounded-2xl p-6 hover:bg-blue-800 transition"
-          >
-            <h3 className="text-xl font-semibold">Admin Dashboard</h3>
-            <p className="text-blue-100 mt-2">
-              View clinic overview and statistics.
-            </p>
-          </Link>
+        <Link
+          to="/admin/users"
+          className="bg-white border rounded-2xl p-6 hover:shadow-md transition"
+        >
+          <h3 className="text-xl font-semibold text-blue-900">Users</h3>
+          <p className="text-gray-600 mt-2">
+            Manage clinic users and roles.
+          </p>
+        </Link>
 
-          <Link
-            to="/admin/users"
-            className="bg-white border rounded-2xl p-6 hover:shadow-md transition"
-          >
-            <h3 className="text-xl font-semibold text-blue-900">Users</h3>
-            <p className="text-gray-600 mt-2">
-              Manage clinic users and roles.
-            </p>
-          </Link>
+        <Link
+          to="/appointments"
+          className="bg-white border rounded-2xl p-6 hover:shadow-md transition"
+        >
+          <h3 className="text-xl font-semibold text-blue-900">
+            Appointments
+          </h3>
+          <p className="text-gray-600 mt-2">
+            Review and update appointment status.
+          </p>
+        </Link>
 
-          <Link
-            to="/appointments"
-            className="bg-white border rounded-2xl p-6 hover:shadow-md transition"
-          >
-            <h3 className="text-xl font-semibold text-blue-900">
-              Appointments
-            </h3>
-            <p className="text-gray-600 mt-2">
-              Review and update appointment status.
-            </p>
-          </Link>
+        <Link
+          to="/doctors"
+          className="bg-white border rounded-2xl p-6 hover:shadow-md transition"
+        >
+          <h3 className="text-xl font-semibold text-blue-900">Doctors</h3>
+          <p className="text-gray-600 mt-2">
+            Add and manage doctors.
+          </p>
+        </Link>
 
-          <Link
-            to="/doctors"
-            className="bg-white border rounded-2xl p-6 hover:shadow-md transition"
-          >
-            <h3 className="text-xl font-semibold text-blue-900">Doctors</h3>
-            <p className="text-gray-600 mt-2">
-              Add and manage doctors.
-            </p>
-          </Link>
+        <Link
+          to="/departments"
+          className="bg-white border rounded-2xl p-6 hover:shadow-md transition"
+        >
+          <h3 className="text-xl font-semibold text-blue-900">
+            Departments
+          </h3>
+          <p className="text-gray-600 mt-2">
+            Manage clinic departments.
+          </p>
+        </Link>
 
-          <Link
-            to="/departments"
-            className="bg-white border rounded-2xl p-6 hover:shadow-md transition"
-          >
-            <h3 className="text-xl font-semibold text-blue-900">
-              Departments
-            </h3>
-            <p className="text-gray-600 mt-2">
-              Manage clinic departments.
-            </p>
-          </Link>
-          <Link
+        <Link
           to="/AdminEmergencyContact"
           className="bg-white border rounded-2xl p-6 hover:shadow-md transition"
-          >
-       <h3 className="text-xl font-semibold text-blue-900">
-      Emergency Contacts
-  </h3>
-  <p className="text-gray-600 mt-2">
-    Add emergency contacts for patients.
-  </p>
-</Link>
-        </div>
+        >
+          <h3 className="text-xl font-semibold text-blue-900">
+            Emergency Contacts
+          </h3>
+          <p className="text-gray-600 mt-2">
+            Add or delete clinic emergency numbers.
+          </p>
+        </Link>
       </div>
-    )
-  }
+    </div>
+  );
+}
 
   if (token && user && isReceptionist) {
   return (

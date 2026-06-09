@@ -24,17 +24,45 @@ function Dashboard() {
     completed: 0,
   })
 
-  const handleExport = async (type) => {
+const handleExport = async (type) => {
+  const format = prompt(
+    "Choose export format: csv, xlsx or json"
+  )
+
+  if (!format) return
+
+  const selectedFormat = format.toLowerCase()
+
+  if (!['csv', 'xlsx', 'json'].includes(selectedFormat)) {
+    alert('Please choose: csv, xlsx or json')
+    return
+  }
+
   try {
-    const res = await api.get(`/exports/${type}?format=csv`, {
-      responseType: 'blob',
-    })
+    if (selectedFormat === 'json') {
+      window.open(
+        `http://127.0.0.1:8000/api/exports/${type}?format=json`,
+        '_blank'
+      )
+      return
+    }
+
+    const res = await api.get(
+      `/exports/${type}?format=${selectedFormat}`,
+      {
+        responseType: 'blob',
+      }
+    )
 
     const url = window.URL.createObjectURL(new Blob([res.data]))
     const link = document.createElement('a')
 
     link.href = url
-    link.setAttribute('download', `${type}_export.csv`)
+    link.setAttribute(
+      'download',
+      `${type}_export.${selectedFormat}`
+    )
+
     document.body.appendChild(link)
     link.click()
     link.remove()
